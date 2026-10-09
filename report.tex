@@ -53,7 +53,7 @@ cross-asset OFI adds almost nothing to \emph{contemporaneous} fit --- yet lagged
 cross-asset OFI yields a small but consistent \emph{out-of-sample} predictive
 signal ($R^2\approx 1\%$) that \emph{exceeds} own-asset predictability, and for the
 tick-constrained names (INTC, MSFT) is their only source of it. The study is fully
-reproducible from the public sample and the code included here.
+reproducible from the public sample and the accompanying code.
 \end{abstract}
 
 \tableofcontents
@@ -581,24 +581,12 @@ cross-asset predictability, and incorporating real quotes/costs to assess whethe
 the cross-asset signal survives execution.
 
 \section{Reproducibility}
-All numbers and figures come from a single script (included in
-Appendix~A) that depends only on NumPy, pandas, and Matplotlib. The computation is
-deterministic. The data is the public LOBSTER AAPL sample; it is not redistributed
-with the code, which reads it from a local path (see the repository README for the
-source).
-
-\appendix
-\section{Source Code: core analysis}
-\lstinputlisting[style=py]{ofi_analysis.py}
-
-\section{Source Code: extensions}
-\lstinputlisting[style=py]{ofi_extensions.py}
-
-\section{Source Code: cross-impact}
-\lstinputlisting[style=py]{xi_analysis.py}
-
-\section{Source Code: inference and structural tests}
-\lstinputlisting[style=py]{ofi_rigor.py}
+All numbers and figures come from a small set of scripts
+(\texttt{ofi\_analysis.py}, \texttt{ofi\_extensions.py}, \texttt{xi\_analysis.py},
+and \texttt{ofi\_rigor.py}, available in the accompanying repository) that depend
+only on NumPy, pandas, and Matplotlib. The computation is deterministic. The data is
+the public LOBSTER sample; it is not redistributed with the code, which reads it from
+a local path (see the repository README for the source).
 
 \begin{thebibliography}{9}
 \bibitem{cks2014} Cont, R., Kukanov, A., \& Stoikov, S. (2014). The price impact
