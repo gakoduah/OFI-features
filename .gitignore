@@ -1,0 +1,7 @@
+data/
+*.csv
+__pycache__/
+*.aux
+*.log
+*.out
+*.toc
