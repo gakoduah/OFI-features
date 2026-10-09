@@ -32,6 +32,17 @@ order flow imbalance at every book level from first principles and asks:
   formation; it does not forecast it at these horizons. Contemporaneous
   explanation and prediction are deliberately kept separate.
 
+### Deeper analyses (`ofi_extensions.py`)
+
+- **Impact is approximately linear** in OFI (binned R² = 0.94, above a power-law
+  fit) — the distinctive property of OFI versus concave trade-size impact.
+- **Impact is permanent**: ≈131% of the immediate move persists after 20s (price
+  keeps drifting in the OFI direction) — information, not transient pressure.
+- **Impact varies intraday**: the coefficient ranges roughly threefold across the
+  session, largest near the open.
+- **No predictability at any horizon**: out-of-sample R² of 0.006 / 0.005 / 0.003 /
+  0.002 at 1 / 2 / 5 / 10 seconds.
+
 See `report.pdf` for the full write-up (derivations, methodology, figures, and the
 embedded source code).
 

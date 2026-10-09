@@ -65,9 +65,12 @@ one-dimensional.
 OFI is $0.51$ (1s), $0.64$ (5s), $0.67$ (10s), $0.74$ (30s).
 \item The price-impact coefficient is positive and strongly significant under
 Newey--West (HAC) standard errors ($t\approx 11$).
-\item Lagged OFI is \emph{not} predictive out of sample ($R^2\approx 0.007$),
-consistent with near-efficiency: OFI accompanies price formation, it does not
-forecast it at these horizons.
+\item Lagged OFI is \emph{not} predictive out of sample ($R^2\approx 0.007$,
+shrinking with horizon), consistent with near-efficiency: OFI accompanies price
+formation, it does not forecast it.
+\item The impact is approximately \emph{linear} in OFI (binned $R^2=0.94$) and
+\emph{permanent} (about $131\%$ of the immediate move persists after 20s), and the
+impact coefficient varies roughly threefold through the trading day.
 \end{itemize}
 \bigskip
 
@@ -259,6 +262,63 @@ un-arbitraged for the next second. The gap between a contemporaneous $R^2$ of
 $0.5$ and a predictive $R^2$ of $0.007$ is precisely the gap between describing
 microstructure and forecasting it, and honest evaluation must keep the two apart.
 
+\section{Deepening the Analysis}
+Four further analyses, all on the same real AAPL data, sharpen the picture.
+
+\subsection{The impact of OFI is approximately linear}
+Binning OFI into quantiles and plotting the mean mid-price change per bin
+(Figure~\ref{fig:lin}) gives a strikingly straight relationship: a linear fit to
+the binned curve attains $R^2 = 0.94$, higher than a fitted power law
+($R^2 = 0.82$; log-log slope $0.35$, with mild concavity only at the extremes).
+This linearity is a known and distinctive feature of \emph{order flow imbalance} ---
+unlike the impact of raw traded volume, which is famously concave (square-root),
+OFI enters price approximately linearly \cite{cks2014}. It is what makes OFI such a
+convenient impact variable: a single coefficient $\lambda$ summarizes the response.
+
+\subsection{The impact is permanent, not transient}
+Regressing the cumulative mid-price change from the start of bucket $t$ to the end
+of bucket $t+\ell$ on $\mathrm{OFI}_t$ gives an impact coefficient $\lambda(\ell)$
+as a function of horizon (Figure~\ref{fig:decay}). It does not decay: starting at
+$\lambda(0) = 4.1\times10^{-3}$ it is $5.3\times10^{-3}$ after twenty seconds ---
+about $131\%$ of the immediate move. The price does not revert after an OFI shock;
+if anything it continues to drift in the same direction. This is the signature of
+\emph{information}, not transient liquidity pressure: order flow imbalance moves the
+price and the move sticks, consistent with OFI reflecting genuine revisions in
+valuation rather than temporary inventory effects.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.49\textwidth]{outputs/fig5_linearity.png}\hfill
+\includegraphics[width=0.49\textwidth]{outputs/fig6_decay.png}
+\caption{Left: the binned impact curve is close to linear. Right: the impact
+coefficient does not decay with horizon --- the price move is permanent.}
+\label{fig:lin}\label{fig:decay}
+\end{figure}
+
+\subsection{The impact coefficient varies through the day}
+Estimating $\lambda$ in thirty-minute bins (Figure~\ref{fig:intraday}) shows it is
+not constant: it ranges from $2.6\times10^{-3}$ to $8.2\times10^{-3}$ cents per unit
+across the session --- a roughly threefold variation, with the largest impact near
+the open when depth is thin and each unit of imbalance moves price more. A fixed-$\lambda$
+model is therefore a convenience, not a law; impact is state-dependent.
+
+\subsection{Predictive power is negligible at every horizon}
+Extending the out-of-sample predictive test to horizons of one, two, five, and ten
+seconds (Figure~\ref{fig:predh}) confirms the earlier result at every horizon: the
+held-out $R^2$ is $0.006$, $0.005$, $0.003$, and $0.002$ respectively --- small and
+shrinking. Whatever information OFI carries is incorporated essentially
+instantaneously; none of it survives as exploitable predictability a second or more
+later.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.49\textwidth]{outputs/fig7_intraday.png}\hfill
+\includegraphics[width=0.49\textwidth]{outputs/fig8_pred_horizon.png}
+\caption{Left: the price-impact coefficient varies about threefold intraday.
+Right: out-of-sample predictive $R^2$ is negligible at all horizons.}
+\label{fig:intraday}\label{fig:predh}
+\end{figure}
+
 \section{Discussion}
 Two conclusions stand out. First, the \emph{depth of the book matters}: moving from
 best-level to all ten levels lifts contemporaneous $R^2$ by about twenty points,
@@ -286,8 +346,11 @@ with the code, which reads it from a local path (see the repository README for t
 source).
 
 \appendix
-\section{Source Code}
+\section{Source Code: core analysis}
 \lstinputlisting[style=py]{ofi_analysis.py}
+
+\section{Source Code: extensions}
+\lstinputlisting[style=py]{ofi_extensions.py}
 
 \begin{thebibliography}{9}
 \bibitem{cks2014} Cont, R., Kukanov, A., \& Stoikov, S. (2014). The price impact
