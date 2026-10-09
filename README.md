@@ -43,6 +43,22 @@ order flow imbalance at every book level from first principles and asks:
 - **No predictability at any horizon**: out-of-sample R² of 0.006 / 0.005 / 0.003 /
   0.002 at 1 / 2 / 5 / 10 seconds.
 
+### Cross-impact across five stocks (`xi_analysis.py`)
+
+Using all five same-day LOBSTER stocks (AAPL, AMZN, GOOG, INTC, MSFT):
+
+- **Own impact dominates:** cross-impact matrix diagonal 0.64–0.94, every
+  off-diagonal below 0.05.
+- **Cross-asset OFI adds almost nothing contemporaneously** (R² uplift ≤ 0.009 over
+  own-OFI).
+- **But it predicts:** lagged cross-asset OFI gives a small, consistent
+  out-of-sample R² (~1%) that **beats own-asset OFI** — and for INTC/MSFT, whose own
+  flow forecasts nothing, it is the *only* source of predictability. A genuine
+  cross-asset lead–lag signal.
+
+Place the five tickers' `message`/`orderbook` CSVs in `data/` and run
+`python3 xi_analysis.py data`.
+
 See `report.pdf` for the full write-up (derivations, methodology, figures, and the
 embedded source code).
 

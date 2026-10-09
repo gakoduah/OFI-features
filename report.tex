@@ -19,9 +19,9 @@
 \newtheorem{definition}{Definition}
 \newtheorem{proposition}{Proposition}
 
-\title{\textbf{Order Flow Imbalance and Price Impact\\ in a Limit Order Book}\\[3pt]
+\title{\textbf{Order Flow Imbalance, Price Impact, and\\ Cross-Impact in Equity Markets}\\[3pt]
 \large Multi-Level and Integrated OFI on Real NASDAQ Data,\\
-with Contemporaneous and Out-of-Sample Analysis}
+with Contemporaneous, Cross-Asset, and Out-of-Sample Analysis}
 \author{Godfred Antwi Koduah\\
 \small Ph.D.\ Student, Financial Mathematics, Florida State University}
 \date{}
@@ -46,8 +46,14 @@ price-impact coefficient is strongly significant under Newey--West inference
 (HAC $t\approx 11$). In sharp contrast, lagged OFI has almost no out-of-sample
 predictive power ($R^2\approx 0.007$ at one second) --- the expected signature of
 an efficient market in which OFI moves price concurrently rather than forecasting
-it. The study is fully reproducible from the public sample and the code included
-here.
+it. Finally, extending to five stocks trading on the same day (AAPL, AMZN, GOOG,
+INTC, MSFT), I estimate the full \emph{cross-impact} matrix: own order flow
+dominates (diagonal $0.64$--$0.94$ versus off-diagonals below $0.05$) and
+cross-asset OFI adds almost nothing to \emph{contemporaneous} fit --- yet lagged
+cross-asset OFI yields a small but consistent \emph{out-of-sample} predictive
+signal ($R^2\approx 1\%$) that \emph{exceeds} own-asset predictability, and for the
+tick-constrained names (INTC, MSFT) is their only source of it. The study is fully
+reproducible from the public sample and the code included here.
 \end{abstract}
 
 \tableofcontents
@@ -71,6 +77,11 @@ formation, it does not forecast it.
 \item The impact is approximately \emph{linear} in OFI (binned $R^2=0.94$) and
 \emph{permanent} (about $131\%$ of the immediate move persists after 20s), and the
 impact coefficient varies roughly threefold through the trading day.
+\item Across five same-day stocks, \emph{own} order flow dominates price impact
+(diagonal $0.64$--$0.94$, off-diagonal $<0.05$); cross-asset OFI adds almost
+nothing contemporaneously, but lagged cross-asset OFI gives a small, consistent
+\emph{out-of-sample} predictive edge ($R^2\approx 1\%$) larger than own-asset
+predictability.
 \end{itemize}
 \bigskip
 
@@ -88,12 +99,14 @@ correlation is accounted for? Third --- the question that separates a describabl
 regularity from a tradeable one --- does OFI \emph{predict} future returns out of
 sample, or only move with price concurrently?
 
-\paragraph{Scope.} This is a single-asset, single-day study on the public LOBSTER
-AAPL sample. That is enough to establish the OFI--price-impact relationship
+\paragraph{Scope.} The core study uses the public LOBSTER sample for a single
+trading day. The single-asset analysis (Sections 4--6) uses AAPL; the
+\emph{cross}-impact analysis (Section~7) uses all five sample stocks
+(AAPL, AMZN, GOOG, INTC, MSFT) trading on that same day, following the multi-asset
+framework of \cite{ccz2023}. One day is enough to establish the relationships
 rigorously and to separate contemporaneous explanation from out-of-sample
-prediction. The multi-asset \emph{cross}-impact extension of
-\cite{ccz2023} --- where one asset's order flow moves another's price --- requires
-synchronized multi-ticker data and is left as clearly-scoped future work.
+prediction; generalizing the magnitudes across many days and names is the natural
+next step.
 
 \section{Data}
 The LOBSTER sample reconstructs the NASDAQ limit order book for AAPL on
@@ -319,6 +332,92 @@ Right: out-of-sample predictive $R^2$ is negligible at all horizons.}
 \label{fig:intraday}\label{fig:predh}
 \end{figure}
 
+\section{Cross-Impact Across Assets}
+Does one stock's order flow move another stock's price? To answer this I extend the
+analysis to all five LOBSTER sample stocks trading on the same day
+(AAPL, AMZN, GOOG, INTC, MSFT).
+
+\subsection{Setup}
+For each asset I build the integrated OFI and the mid-price return in common
+one-second buckets, keep the $11{,}782$ buckets present for all five names, and
+standardize each asset's OFI and return (zero mean, unit variance) so coefficients
+are comparable across stocks of very different price levels. The contemporaneous
+cross-impact model regresses each asset's return on \emph{every} asset's OFI,
+\begin{equation}
+r^{(i)}_\tau = \alpha_i + \sum_{j=1}^{5} \Lambda_{ij}\, \mathrm{OFI}^{(j)}_\tau + \varepsilon^{(i)}_\tau,
+\end{equation}
+so the matrix $\Lambda$ collects own impact on its diagonal and cross-impact off it.
+
+\subsection{Own impact dominates; cross-impact is small}
+The estimated cross-impact matrix (Figure~\ref{fig:xi}, left) is strongly diagonal:
+own-asset coefficients run from $0.64$ (AMZN) to $0.94$ (MSFT), while every
+off-diagonal is below $0.05$. Consistent with this, adding all five assets' OFI
+barely improves the contemporaneous fit over own-OFI alone (Table~\ref{tab:xi},
+Figure~\ref{fig:xi}, right): the uplift is at most $+0.009$ ($R^2$) and essentially
+zero for the names whose own-OFI already explains $85$--$89\%$ of their variance.
+The cross terms that do appear are concentrated among the three high-priced tech
+names (AAPL, AMZN, GOOG), which move together more than they move with the
+tick-constrained INTC and MSFT.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+Asset & Own-OFI $R^2$ & All-asset $R^2$ & Uplift \\
+\midrule
+AAPL & 0.547 & 0.556 & $+0.009$ \\
+AMZN & 0.454 & 0.462 & $+0.008$ \\
+GOOG & 0.442 & 0.443 & $+0.001$ \\
+INTC & 0.852 & 0.853 & $+0.000$ \\
+MSFT & 0.891 & 0.891 & $+0.000$ \\
+\bottomrule
+\end{tabular}
+\caption{Contemporaneous $R^2$: own-asset OFI versus all five assets' OFI. Cross
+terms add almost nothing once own OFI is included.}
+\label{tab:xi}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.52\textwidth]{outputs/fig9_xi_matrix.png}\hfill
+\includegraphics[width=0.46\textwidth]{outputs/fig10_xi_r2.png}
+\caption{Left: the contemporaneous cross-impact matrix (rows = affected asset,
+columns = source of OFI); the diagonal dominates. Right: own-OFI versus all-asset
+OFI explanatory power --- cross-asset OFI adds little contemporaneously.}
+\label{fig:xi}
+\end{figure}
+
+\subsection{But cross-asset flow helps \emph{predict}}
+The more interesting result is out of sample. Own-asset OFI has essentially no
+predictive power for the next bucket's return (held-out $R^2$ of $0.005$ for the
+tech names and \emph{zero} for INTC and MSFT). Using all five assets' lagged OFI,
+however, lifts the out-of-sample $R^2$ to about $1\%$ for every stock --- small in
+absolute terms, but consistently positive, and \emph{larger than own-asset
+predictability} (Table~\ref{tab:xipred}). For INTC and MSFT, whose own order flow
+forecasts nothing, essentially all of the (modest) predictability comes from
+\emph{other} stocks' order flow. This is a genuine cross-asset lead--lag signal: the
+contemporaneous book is efficient to own flow, but information in the cross-section
+of order flow is not fully impounded within the second.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+Asset & Own-OFI OOS $R^2$ & All-asset OOS $R^2$ \\
+\midrule
+AAPL & 0.0047 & 0.0086 \\
+AMZN & 0.0051 & 0.0120 \\
+GOOG & 0.0068 & 0.0108 \\
+INTC & $-0.0001$ & 0.0099 \\
+MSFT & $-0.0000$ & 0.0106 \\
+\bottomrule
+\end{tabular}
+\caption{Out-of-sample predictive $R^2$ for the next bucket's return (chronological
+train/test split). Cross-asset OFI consistently beats own-asset OFI, and supplies
+all of the predictability for INTC and MSFT.}
+\label{tab:xipred}
+\end{table}
+
 \section{Discussion}
 Two conclusions stand out. First, the \emph{depth of the book matters}: moving from
 best-level to all ten levels lifts contemporaneous $R^2$ by about twenty points,
@@ -329,14 +428,15 @@ none of it out of sample. For execution and impact modelling --- sizing the pric
 move a given order flow will cause --- the contemporaneous relationship is exactly
 what matters; for alpha, OFI at these horizons is close to efficient.
 
-\paragraph{Limitations and extensions.} This is one asset on one day, so the
-estimates are illustrative rather than universal; the clean way to generalize is to
-repeat across names and dates. The most substantive extension is \emph{cross}-impact:
-with synchronized multi-asset data, one estimates how asset $j$'s OFI moves asset
-$i$'s price \cite{ccz2023}, and whether a cross-asset integrated factor improves on
-per-asset OFI. That requires multi-ticker LOBSTER or vendor data and is the natural
-next step. Other directions include a non-linear (concave) impact specification and
-an intraday-varying $\lambda$.
+\paragraph{Limitations and extensions.} This is one trading day, so the magnitudes
+are illustrative rather than universal; the clean way to generalize is to repeat
+across many days and a wider cross-section. The cross-impact result in particular
+rests on five stocks for a single session, and the small out-of-sample edge, while
+consistent across names, is economically modest and would need many days and
+realistic costs before any trading claim could be made. Natural next steps include a
+larger universe, a lead--lag analysis at sub-second resolution to localize the
+cross-asset predictability, and incorporating real quotes/costs to assess whether
+the cross-asset signal survives execution.
 
 \section{Reproducibility}
 All numbers and figures come from a single script (included in
@@ -351,6 +451,9 @@ source).
 
 \section{Source Code: extensions}
 \lstinputlisting[style=py]{ofi_extensions.py}
+
+\section{Source Code: cross-impact}
+\lstinputlisting[style=py]{xi_analysis.py}
 
 \begin{thebibliography}{9}
 \bibitem{cks2014} Cont, R., Kukanov, A., \& Stoikov, S. (2014). The price impact
