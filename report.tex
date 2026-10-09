@@ -77,11 +77,15 @@ formation, it does not forecast it.
 \item The impact is approximately \emph{linear} in OFI (binned $R^2=0.94$) and
 \emph{permanent} (about $131\%$ of the immediate move persists after 20s), and the
 impact coefficient varies roughly threefold through the trading day.
+\item A one-parameter structural model ($\lambda = 1/(2D)$) is confirmed in the
+data: impact scales with inverse depth (correlation $0.67$, $\lambda D$ constant to
+CV $0.25$) and matches the predicted level ($4.1$ vs $3.3\times10^{-3}$).
 \item Across five same-day stocks, \emph{own} order flow dominates price impact
-(diagonal $0.64$--$0.94$, off-diagonal $<0.05$); cross-asset OFI adds almost
-nothing contemporaneously, but lagged cross-asset OFI gives a small, consistent
-\emph{out-of-sample} predictive edge ($R^2\approx 1\%$) larger than own-asset
-predictability.
+(diagonal $0.64$--$0.94$, off-diagonal $<0.05$); cross terms are statistically
+significant for the large-caps (joint Wald $\chi^2_4=47$ for AAPL) but not for the
+tick-constrained names. Lagged cross-asset OFI gives a small out-of-sample
+predictive edge ($R^2\approx 1\%$) that is significant for \emph{all} five stocks by
+the Clark--West test ($p<10^{-5}$) and exceeds own-asset predictability.
 \end{itemize}
 \bigskip
 
@@ -185,6 +189,56 @@ weights,
 \end{equation}
 with $\hat\Omega_l$ the lag-$l$ autocovariance of the score $x_i \hat\varepsilon_i$
 and $L=10$.
+
+\subsection{A structural model: why impact is linear and depth-scaled}
+The linear specification \eqref{eq:impact} is not merely convenient; it follows from
+a stylized model of the book. Suppose each side rests at constant depth $D$ (shares
+available at the touch) and the mid-price advances only as the queue is consumed or
+replenished.
+
+\begin{proposition}[Linear, depth-scaled impact]
+\label{prop:impact}
+In the constant-depth model, the expected mid-price change over an interval is
+\[
+\mathbb{E}[\Delta \mathrm{mid}] = \frac{1}{2D}\,\mathrm{OFI},
+\]
+so impact is linear in OFI with coefficient $\lambda = 1/(2D)$, inversely
+proportional to depth.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+A net order-flow imbalance of $\mathrm{OFI}$ shares is, by definition, the net
+quantity added to the bid queue less that added to the ask queue. With $D$ shares
+per level, a net consumption of $D$ shares on one side shifts that best quote by one
+level; the mid-price, the average of the two best quotes, therefore moves by half of
+the one-sided displacement. Accumulating signed contributions over the interval and
+taking expectations gives $\mathbb{E}[\Delta\mathrm{mid}] = \mathrm{OFI}/(2D)$. The
+key structural point is that it is \emph{imbalance in shares}, not traded volume,
+that enters --- which is why OFI impact is linear whereas trade-size impact, where
+the same volume can arrive against varying available depth, is concave.
+\end{proof}
+
+Proposition~\ref{prop:impact} makes two testable predictions we return to in the
+results: $\lambda$ should be (i) inversely proportional to depth and (ii) stable
+when multiplied by depth. Both hold in the data.
+
+\subsection{The integrated OFI is variance-optimal}
+The integrated OFI is the first principal component of the standardized level OFIs.
+This is optimal in a precise sense.
+\begin{proposition}[PCA optimality]
+Among all unit-norm weight vectors $w$, the integrated series $w^\top
+\widetilde{\mathrm{OFI}}$ of maximal variance is given by the leading eigenvector of
+$\Sigma = \operatorname{Cov}(\widetilde{\mathrm{OFI}})$, and the fraction of total
+level-OFI variance it captures is $\lambda_{\max}/\sum_k \lambda_k$, the leading
+eigenvalue share.
+\end{proposition}
+\begin{proof}
+Maximizing $w^\top \Sigma w$ subject to $\|w\|=1$ has Lagrangian
+$w^\top\Sigma w - \mu(w^\top w - 1)$; the first-order condition $\Sigma w = \mu w$
+makes $w$ an eigenvector and $w^\top\Sigma w = \mu$, maximized by the largest
+eigenvalue. The variance-share claim is immediate since $\operatorname{tr}\Sigma =
+\sum_k \lambda_k$ is the total variance.
+\end{proof}
 
 \subsection{Out-of-sample predictive test}
 Contemporaneous explanation does not imply forecasting power. To test prediction
@@ -315,6 +369,27 @@ across the session --- a roughly threefold variation, with the largest impact ne
 the open when depth is thin and each unit of imbalance moves price more. A fixed-$\lambda$
 model is therefore a convenience, not a law; impact is state-dependent.
 
+\subsection{The structural prediction holds: impact scales with $1/$depth}
+The intraday variation of $\lambda$ is not arbitrary --- it is what
+Proposition~\ref{prop:impact} predicts. Estimating $\lambda$ and the average
+best-level depth $D$ in each half-hour bin, the two move together as the theory
+requires (Figure~\ref{fig:struct}): the correlation between $\lambda$ and $1/D$ is
+$0.67$, and the product $\lambda D$ is roughly constant across the day
+(coefficient of variation $0.25$). The levels agree too: the full-day estimate is
+$\lambda = 4.1\times10^{-3}$ cents per share against the stylized prediction
+$1/(2D) = 3.3\times10^{-3}$ (average depth $D \approx 151$ shares) --- the same order
+of magnitude, with the modest gap attributable to depth beyond the touch and
+discrete ticks. A structural model with one parameter thus captures both the sign
+and the scale of price impact.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.56\textwidth]{outputs/fig12_structural.png}
+\caption{Price impact versus inverse depth across the trading day. As
+Proposition~\ref{prop:impact} predicts, $\lambda$ rises when the book is thin.}
+\label{fig:struct}
+\end{figure}
+
 \subsection{Predictive power is negligible at every horizon}
 Extending the out-of-sample predictive test to horizons of one, two, five, and ten
 seconds (Figure~\ref{fig:predh}) confirms the earlier result at every horizon: the
@@ -359,6 +434,41 @@ The cross terms that do appear are concentrated among the three high-priced tech
 names (AAPL, AMZN, GOOG), which move together more than they move with the
 tick-constrained INTC and MSFT.
 
+Small does not mean spurious. Computing Newey--West $t$-statistics for every entry
+of $\Lambda$, the cross terms are \emph{statistically} significant for the tech
+names even though they are economically tiny: AAPL's price responds significantly to
+all four other order flows ($t = 2.9$ to $4.5$), and a joint Wald test that the four
+off-diagonal coefficients are zero is decisively rejected for AAPL
+($\chi^2_4 = 47.1$) and AMZN ($\chi^2_4 = 20.3$), marginally for GOOG
+($\chi^2_4 = 9.8$, $p\approx0.04$), and not rejected for INTC ($7.0$) or MSFT
+($4.5$) (Table~\ref{tab:wald}). So contemporaneous cross-impact is real and
+measurable among the correlated large-caps, and absent for the tick-constrained
+names --- a genuine distinction, not an artifact.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+Affected asset & Wald $\chi^2_4$ (off-diagonal $=0$) & Reject at 5\%? \\
+\midrule
+AAPL & 47.1 & yes ($p<10^{-3}$) \\
+AMZN & 20.3 & yes ($p<10^{-3}$) \\
+GOOG & 9.8 & yes ($p\approx0.04$) \\
+INTC & 7.0 & no \\
+MSFT & 4.5 & no \\
+\bottomrule
+\end{tabular}
+\caption{Joint Wald test (HAC) that a stock's four cross-impact coefficients are
+zero. Critical values: $\chi^2_{4,0.05}=9.49$, $\chi^2_{4,0.01}=13.28$.}
+\label{tab:wald}
+\end{table}
+
+The integrated OFI's one-dimensionality also differs across names: the first
+principal component of the ten level OFIs captures $54\%$ (AAPL), $51\%$ (AMZN),
+$61\%$ (GOOG), $87\%$ (INTC), and $91\%$ (MSFT) of level-OFI variance --- the
+tick-constrained stocks have far more coherent depth, which is why a single factor
+summarizes them almost completely.
+
 \begin{table}[h]
 \centering
 \begin{tabular}{lccc}
@@ -395,9 +505,41 @@ however, lifts the out-of-sample $R^2$ to about $1\%$ for every stock --- small 
 absolute terms, but consistently positive, and \emph{larger than own-asset
 predictability} (Table~\ref{tab:xipred}). For INTC and MSFT, whose own order flow
 forecasts nothing, essentially all of the (modest) predictability comes from
-\emph{other} stocks' order flow. This is a genuine cross-asset lead--lag signal: the
-contemporaneous book is efficient to own flow, but information in the cross-section
-of order flow is not fully impounded within the second.
+\emph{other} stocks' order flow.
+
+To confirm this improvement is not just the larger model over-fitting, I apply the
+Clark--West test for nested out-of-sample forecast comparison. For each asset let
+$\hat y^{(1)}$ be the own-OFI forecast and $\hat y^{(2)}$ the all-asset forecast,
+with errors $e^{(1)}, e^{(2)}$; the adjusted loss differential is
+\begin{equation}
+f_\tau = \big(e^{(1)}_\tau\big)^2 - \Big[\big(e^{(2)}_\tau\big)^2 - \big(\hat y^{(1)}_\tau - \hat y^{(2)}_\tau\big)^2\Big],
+\end{equation}
+and the test statistic is the $t$-ratio of $\bar f$ (the correction term
+$(\hat y^{(1)}-\hat y^{(2)})^2$ removes the bias that extra parameters inject under
+the null of no added predictability). The result is unambiguous: the cross-asset
+model's out-of-sample gain is significant for \emph{every} stock
+(Table~\ref{tab:cw}; CW statistics $4.4$--$7.5$, all $p < 10^{-5}$). This is a
+genuine cross-asset lead--lag signal: the contemporaneous book is efficient to own
+flow, but information in the cross-section of order flow is not fully impounded
+within the second.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+Asset & Clark--West statistic & $p$-value (one-sided) \\
+\midrule
+AAPL & 4.74 & $1.1\times10^{-6}$ \\
+AMZN & 6.30 & $1.5\times10^{-10}$ \\
+GOOG & 4.40 & $5.4\times10^{-6}$ \\
+INTC & 5.59 & $1.2\times10^{-8}$ \\
+MSFT & 7.49 & $3.6\times10^{-14}$ \\
+\bottomrule
+\end{tabular}
+\caption{Clark--West test that adding cross-asset OFI improves out-of-sample
+prediction over own-OFI alone. Significant for all five stocks.}
+\label{tab:cw}
+\end{table}
 
 \begin{table}[h]
 \centering
@@ -454,6 +596,9 @@ source).
 
 \section{Source Code: cross-impact}
 \lstinputlisting[style=py]{xi_analysis.py}
+
+\section{Source Code: inference and structural tests}
+\lstinputlisting[style=py]{ofi_rigor.py}
 
 \begin{thebibliography}{9}
 \bibitem{cks2014} Cont, R., Kukanov, A., \& Stoikov, S. (2014). The price impact

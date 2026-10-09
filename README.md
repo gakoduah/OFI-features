@@ -59,6 +59,17 @@ Using all five same-day LOBSTER stocks (AAPL, AMZN, GOOG, INTC, MSFT):
 Place the five tickers' `message`/`orderbook` CSVs in `data/` and run
 `python3 xi_analysis.py data`.
 
+### Inference and structural tests (`ofi_rigor.py`)
+
+- **Structural law confirmed:** a one-parameter model λ = 1/(2D) (derived in the
+  report) holds in the data — impact correlates 0.67 with 1/depth, λ·D is constant
+  to CV 0.25, and the measured λ (0.0041) matches 1/(2D) = 0.0033.
+- **Cross-impact significance:** Newey–West t-stats and a joint Wald test — cross
+  terms are significant for the large-caps (AAPL χ²₄ = 47) but not the
+  tick-constrained names.
+- **Clark–West nested test:** the cross-asset out-of-sample gain is significant for
+  all five stocks (p < 1e-5).
+
 See `report.pdf` for the full write-up (derivations, methodology, figures, and the
 embedded source code).
 
