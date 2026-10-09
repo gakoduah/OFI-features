@@ -70,6 +70,19 @@ Place the five tickers' `message`/`orderbook` CSVs in `data/` and run
 - **Clark–West nested test:** the cross-asset out-of-sample gain is significant for
   all five stocks (p < 1e-5).
 
+### Advanced analyses (`ofi_advanced.py`)
+
+- **Lead–lag:** own impact is an instantaneous symmetric spike (corr 0.79 at lag 0);
+  cross-asset OFI has a predictive 1–3s positive-lag tail — the source of the
+  cross-asset predictability.
+- **Spectral structure:** the return cross-section is dominated by one market mode
+  (36% of variance).
+- **Economic significance (honest):** the cross-asset signal is reliably positive
+  gross (+0.07 bps/bucket) but loses to realistic half-spread costs
+  (−0.67 bps/bucket) — informative, not tradeable at 1s. Research-vs-P&L gap made
+  explicit.
+- **Stability:** own-impact coefficient steady morning→afternoon (within 3%).
+
 See `report.pdf` for the full write-up (derivations, methodology, figures, and the
 embedded source code).
 
